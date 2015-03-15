@@ -1,0 +1,92 @@
+#!/bin/sh
+#
+### BEGIN INIT INFO
+# Provides:          Maraschino application instance
+# Required-Start:    $all
+# Required-Stop:     $all
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: starts Maraschino
+# Description:       starts Maraschino
+### END INIT INFO
+
+# Source function library.
+. /etc/init.d/functions
+
+prog=maraschino
+lockfile=/var/run/maraschino/$prog.lock
+
+# Source maraschino configuration
+if [ -f /etc/sysconfig/maraschino ]; then
+        . /etc/sysconfig/maraschino
+fi
+
+## Edit user configuation in /etc/sysconfig/maraschino to change
+## the defaults
+username=${MC_USER-maraschino}
+homedir=${MC_HOME-/opt/maraschino}
+datadir=${MC_DATA-~/.maraschino}
+pidfile=${MC_PIDFILE-/var/run/maraschino/maraschino.pid}
+port=${MC_PORT-7000}
+nice=${MC_NICE-}
+mhost=${MC_HOST-localhost}
+##
+
+pidpath=`dirname ${pidfile}`
+options=" --daemon --pidfile=${pidfile} --datadir=${datadir} --host=${mhost} --port=${port}"
+
+# create PID directory if not exist and ensure the maraschino user can write to it
+if [ ! -d $pidpath ]; then
+        mkdir -p $pidpath
+        chown $username $pidpath
+fi
+
+if [ ! -d $datadir ]; then
+        mkdir -p $datadir
+        chown $username $datadir
+fi
+
+start() {
+        # Start daemon.
+        echo -n $"Starting $prog: "
+        daemon --user=${username} --pidfile=${pidfile} ${nice} python ${homedir}/Maraschino.py ${options}
+        RETVAL=$?
+        echo
+        [ $RETVAL -eq 0 ] && touch $lockfile
+        return $RETVAL
+}
+
+stop() {
+        echo -n $"Shutting down $prog: "
+        killproc -p ${pidfile} python
+        RETVAL=$?
+        echo
+        [ $RETVAL -eq 0 ] && rm -f $lockfile
+        return $RETVAL
+}
+
+# See how we were called.
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  status)
+        status -p $pidfile $prog
+        ;;
+  restart|force-reload)
+        stop
+        start
+        ;;
+  try-restart|condrestart)
+        if status -p $pidfile $prog > /dev/null; then
+            stop
+            start
+        fi
+        ;;
+  *)
+        echo $"Usage: $0 {start|stop|status|restart|force-reload|try-restart|condrestart}"
+        exit 2
+esac
