@@ -1,0 +1,93 @@
+#!/bin/sh
+#
+### BEGIN INIT INFO
+# Provides:          sabnzbd
+# Required-Start:    $all
+# Required-Stop:     $all
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: starts sabnzbd
+# Description:       starts sabnzbd
+### END INIT INFO
+
+# Source function library.
+. /etc/init.d/functions
+
+# Source SickBeard configuration
+if [ -f /etc/sysconfig/sabnzbd ]; then
+        . /etc/sysconfig/sabnzbd
+fi
+
+prog=sabnzbd
+lockfile=/var/run/sabnzbd/subsys/$prog
+
+## Edit user configuation in /etc/sysconfig/sabnzbd to change
+## the defaults
+username=${SN_USER-sabnzbd}
+homedir=${SN_HOME-/opt/sabnzbd}
+datadir=${SN_DATA-/opt/sabnzbd}
+pidfile=${SN_PIDFILE-/var/run/sabnzbd/sabnzbd.pid}
+nice=${SN_NICE-}
+port=${SN_PORT-7000}
+sport=${SN_SPORT-7001}
+mhost=${SN_HOST-localhost}
+##
+
+pidpath=`dirname ${pidfile}`
+options=" -f ${homedir}/config.ini -s ${mhost}:${port} -b 1 --https ${sport} --daemon --pidfile=${pidfile}"
+
+# create PID directory if not exist and ensure the SickBeard user can write to it
+if [ ! -d $pidpath ]; then
+        mkdir -p $pidpath
+        chown $username $pidpath
+fi
+
+if [ ! -d $datadir ]; then
+        mkdir -p $datadir
+        chown $username $datadir
+fi
+
+start() {
+        # Start daemon.
+        echo -n $"Starting $prog: "
+        daemon --user=${username} --pidfile=${pidfile} ${nice} python ${homedir}/SABnzbd.py ${options}
+        RETVAL=$?
+        echo
+        [ $RETVAL -eq 0 ] && touch $lockfile
+        return $RETVAL
+}
+
+stop() {
+        echo -n $"Shutting down $prog: "
+        killproc -p ${pidfile} python
+        RETVAL=$?
+        echo
+        [ $RETVAL -eq 0 ] && rm -f $lockfile
+        return $RETVAL
+}
+
+# See how we were called.
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  status)
+        status -p $pidfile $prog
+        ;;
+  restart|force-reload)
+        stop
+        start
+        ;;
+  try-restart|condrestart)
+        if status -p $pidfile $prog > /dev/null; then
+            stop
+            start
+        fi
+        ;;
+  *)
+        echo $"Usage: $0 {start|stop|status|restart|force-reload|try-restart|condrestart}"
+        exit 2
+esac
