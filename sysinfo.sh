@@ -26,10 +26,12 @@ cpu_info () {
 local cpu_load=$(cat /proc/loadavg)
 local cpu_model=$(cat /proc/cpuinfo | grep '^model name' | uniq | awk -F': ' '{ print $2 }')
 local cpu_cores=$(cat /proc/cpuinfo | grep '^cpu cores' | uniq | awk -F': ' '{ print $2 }')
+local cpuinfo=$(dmidecode -t 'processor' | tail -n+5 | head -n-1)
 
 printf "CPU Model: %s \n" "$cpu_model"
 printf "Number of Cores: %d \n" "$cpu_cores"
-printf "CPU Load Average %s \n\n" "$cpu_load"
+printf "\nCPU Information: %s \n\n" "$cpuinfo"
+printf "CPU Load Average: %s \n\n" "$cpu_load"
 }
 
 memory_info () {
