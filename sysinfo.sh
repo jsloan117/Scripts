@@ -75,6 +75,7 @@ $(declare -f system_name)
 $(declare -f cpu_info)
 $(declare -f memory_info)
 $(declare -f disk_usage)
+$(declare -f system_hardware_info)
 
 echo -e "\nGathering System Related Information on the machine now, please be patient...\n\n"
 
@@ -82,6 +83,7 @@ system_name
 cpu_info
 memory_info
 disk_usage
+system_hardware_info
 
 echo -e "\nDone! Please review the above displayed infomation."
 EOF
@@ -94,6 +96,7 @@ system_name
 cpu_info
 memory_info
 disk_usage
+system_hardware_info
 
 echo -e "\nDone! Please review the above displayed infomation."
 
