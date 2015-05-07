@@ -42,6 +42,16 @@ printf "Total Memory: %d \n" "$memtotal"
 printf "Free Memory: %d \n\n" "$memfree"
 }
 
+system_hardware_info () {
+local mobo_info=$(dmidecode -t 'baseboard' | tail -n+5 | head -n-1)
+local bios_info=$(dmidecode -t 'bios' | tail -n+5 | head -n-1)
+local system_info=$(dmidecode -t 'system' | tail -n+5 | head -n-1)
+
+printf "\nMotherBoard Information: %s \n\n" "$mobo_info"
+printf "\nBIOS Information: %s \n\n" "$bios_info"
+printf "\nSystem Information: %s \n\n" "$system_info"
+}
+
 system_name () {
 local hname=$(hostname -s)
 local fname=$(hostname -f)
