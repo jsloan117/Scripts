@@ -65,7 +65,7 @@ local services=$(service --status-all | grep 'running...' | grep -v 'xfers')
 local num=$(service --status-all | grep 'running...' | grep -v 'xfers' | wc -l)
 
 printf "The current running services are: %s \n" "$services"
-print "The number of running services is: %d \n\n" "$num"
+printf "The number of running services is: %d \n\n" "$num"
 }
 
 if [[ "$sshhost" != 'localhost' && "$sshhost" != '127.0.0.1' ]]; then
