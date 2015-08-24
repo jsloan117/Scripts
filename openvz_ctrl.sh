@@ -50,7 +50,7 @@ local data="$3" # Value
 if [[ "$parameter" = 'name' ]]; then
 
     vzctl set "$CTID" --name "$data" --save
-    [[ ! -L /etc/vz/names/"$data" ]] && ln -vs /etc/vz/conf/"$CTID".conf /etc/vz/names/"$data"
+    [[ ! -L /etc/vz/names/"$data" ]] && ln -vs ln -vs ../../../etc/vz/conf/"$CTID".conf /etc/vz/names/"$data"
 
 else
 
