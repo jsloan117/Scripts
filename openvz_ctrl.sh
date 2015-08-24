@@ -28,16 +28,18 @@ done
 
 create_vz_container () {
 local CTID="$1"
-local OSTEMP="$2"
+local OSTEMPLATE="$2"
+local CONFDEFAULT="$3"
+[[ -z "$CONFDEFAULT" ]] && CONFDEFAULT='basic'
 
-vzctl create "$CTID" --ostemplate "$OSTEMP" -–config basic
+vzctl create "$CTID" --ostemplate "$OSTEMPLATE" -–config "$CONFDEFAULT"
 }
 
 delete_vz_container () {
 local CTID="$1"
 
-vzctl stop "$CTID"
-vzctl destroy "$CTID"
+control_container "$CTID" "stop"
+control_container "$CTID" "destroy"
 }
 
 set_vz_parameters () {
@@ -50,9 +52,11 @@ if [[ "$parameter" = 'name' ]]; then
     vzctl set "$CTID" --name "$data" --save
     [[ ! -L /etc/vz/names/"$data" ]] && ln -vs /etc/vz/conf/"$CTID".conf /etc/vz/names/"$data"
 
-fi
+else
 
-vzctl set "$CTID" --"$parameter" "$data" --save
+    vzctl set "$CTID" --"$parameter" "$data" --save
+
+fi
 }
 
 
@@ -69,11 +73,16 @@ local action="$2"
 
 if [[ "$action" = 'yes' ]]; then
 
-    vzctl set "$CTID" --disabled yes --save
+    control_container "$CTID" "stop"
+#    vzctl set "$CTID" --disabled yes --save
+    set_vz_parameters "$CTID" "disabled" "yes"
 
 elif [[ "$action" = 'no' ]]; then
 
-    vzctl set "$CTID" --disabled no --save
+    set_vz_parameters "$CTID" "disabled" "no"
+#    vzctl set "$CTID" --disabled no --save
+    control_container "$CTID" "start"
+    control_container "$CTID" "status"
 
 fi
 }
@@ -84,11 +93,11 @@ local action="$2"
 
 if [[ "$action" = 'suspend' ]]; then
 
-    vzctl chkpnt "$CTID"
+    vzctl suspend "$CTID" --dumpfile /vz/dump/"$CTID".dump
 
 elif [[ "$action" = 'restore' ]]; then
 
-    vzctl restore "$CTID"
+    vzctl resume "$CTID" --dumpfile /vz/dump/"$CTID".dump
 
 fi
 }
