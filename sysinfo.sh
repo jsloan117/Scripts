@@ -6,7 +6,7 @@ read -ep "Please enter username to connect with: " sshuser
 read -ep "Please enter port to connect to: " sshport
 
 remote_connect () {
-ssh -p "$sshport" "$sshuser"@"$sshhost"
+ssh -p"$sshport" "$sshuser"@"$sshhost"
 }
 
 disk_usage () { # report file system disk space usage
