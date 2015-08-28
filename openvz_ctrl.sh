@@ -174,8 +174,9 @@ fi
 
 create_snapshot () {
 local ctid="$1"
+local _date="$(date "+%F")"
 
-vzctl snapshot "$ctid" --name "$ctid.snapshot"
+vzctl snapshot "$ctid" --name "$ctid-$_date.snapshot"
 }
 
 list_snapshots () {
