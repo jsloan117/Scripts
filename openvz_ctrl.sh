@@ -1,6 +1,8 @@
 #!/bin/bash
 # Used to manage  openvz containers
-# version: 1.3
+# version: 1.4
+
+status="$?"
 
 list_vz_containers () {
 local ctid="$1"
@@ -56,6 +58,7 @@ elif [[ -n "$hostname" && -n "$ipadd" ]]; then
 
 fi
 [[ -n "$nameservers" ]] && set_vz_parameters "$ctid" "nameserver" "$nameservers"
+control_container "$ctid" "start"
 }
 
 delete_vz_container () {
@@ -73,7 +76,7 @@ local data="$3" # Value
 if [[ "$parameter" = 'name' ]]; then
 
     vzctl set "$ctid" --name "$data" --save
-    [[ ! -L /etc/vz/names/"$data" ]] && ln -vs ln -vs ../../../etc/vz/conf/"$ctid".conf /etc/vz/names/"$data"
+    [[ ! -L /etc/vz/names/"$data" ]] && ln -vs ../../../etc/vz/conf/"$ctid".conf /etc/vz/names/"$data"
 
 else
 
@@ -81,7 +84,6 @@ else
 
 fi
 }
-
 
 control_container () {
 local ctid="$1"
@@ -103,7 +105,6 @@ elif [[ "$action" = 'no' ]]; then
 
     set_vz_parameters "$ctid" "disabled" "no"
     suspend_container "$ctid" "restore"
-    control_container "$ctid" "status"
 
 fi
 }
@@ -123,31 +124,40 @@ elif [[ "$action" = 'restore' ]]; then
 fi
 }
 
-#change_ctid_number () {
-#local ctid="$1"
-#local newnumber="$2"
+change_ctid_number () {
+local confdir='/etc/vz/conf'
+local privatedatadir='/vz/private'
+local rootdatadir='/vz/root'
+local ctid="$1"
+local newnumber="$2"
 
-#suspend_container "$ctid" "suspend"
-#vzctl restore "$newnumber" --dumpfile /vz/dump/"$ctid".dump
-#}
+suspend_container "$ctid" "suspend"
+mv "$confdir/$ctid.conf" "$confdir/$newnumber.conf"
+mv "$privatedatadir/$ctid" "$privatedatadir/$newnumber"
+mv "$rootdatadir/$ctid" "$rootdatadir/$newnumber"
+sed -i "s/VE_ROOT=\"\(.*\)\"/VE_ROOT=\"\/vz\/root\/$newnumber\"/g" "$confdir/$newnumber.conf"
+sed -i "s/VE_PRIVATE=\"\(.*\)\"/VE_PRIVATE=\"\/vz\/private\/$newnumber\"/g" "$confdir/$newnumber.conf"
+vzctl restore "$newnumber" --dumpfile /vz/dump/"$ctid".dump
+[[ "$status" = '0' ]] && rm -fv /vz/dump/"$ctid".dump || echo -e "Restore failed... \n"
+}
 
 migrate_container () {
 local ctid="$1"
 local destsvr="$2"
 local sshport="$3"
-local status="$?"
 [[ -z "$sshport" ]] && sshport='22'
 
-read -p "\nYou must configure ssh-keys inbetween the source and destination servers for this to be successful. Have you done this? \n" yesno
+echo -e "Please ensure that container: $ctid does NOT exist on the remote host: $destsvr! \n"
+read -p "You must configure ssh-keys inbetween the source and destination servers for this to be successful. Have you done this? " yesno
 
 if [[ "$yesno" = 'yes' || "$yesno" = 'y' ]]; then
 
-    vzmigrate --ssh="-p $sshport" --rsync="-axvz --progress" "$destsvr" "$ctid"
+
+    vzmigrate --ssh="-p$sshport" --rsync="-axvz --progress" "$destsvr" "$ctid"
 
 else
 
-    echo -e "\nExiting to setup keys \n" && exit 0
-    #ssh-keygen -t rsa -b 4096
+    echo -e "\nExiting to setup keys \n" && exit 1
 
 fi
 
@@ -175,13 +185,13 @@ vzctl snapshot-list "$ctid"
 }
 
 help_menu () {
-local version='1.3'
+local version='1.4'
 local prog="$(echo $(basename $0))"
 
 cat <<EOF
 This script is used to manage openvz containers. You can list, create, delete, and set parameters of the virtual machine.
-  $prog <[-l|--list] [-lt|--listtemplates] [-lc|--listconfs] [-c|--create] [-d|--delete] [-s|--set] [-cc|--control] [-dc|--lock]
-         [-sc|--suspend] [-m|--migrate] [-cs|--snapshot] [-ls|--listsnapshot] [-h|--help]>
+  $prog <[-l|--list] [-lt|--listtemplates] [-lc|--listconfs] [-cc|--create] [-d|--delete] [-s|--set] [-c|--control] [-dc|--lock]
+         [-sc|--suspend] [-cn|--changenum] [-m|--migrate] [-cs|--snapshot] [-ls|--listsnapshot] [-h|--help]> <arguments>
 
   Examples: $prog -l 102
             $prog -c 102 centos-6-x86_64
@@ -217,7 +227,7 @@ case "$selection" in
 
     list_conf_files "$1" ;;
 
-  -c|--create)
+  -cc|--create)
 
     shift
     create_vz_container "$@" ;;
@@ -232,7 +242,7 @@ case "$selection" in
     shift
     set_vz_parameters "$@" ;;
 
-  -cc|--control)
+  -c|--control)
 
     shift
     control_container "$@" ;;
@@ -247,10 +257,10 @@ case "$selection" in
     shift
     suspend_container "$@" ;;
 
-#  -cn|--changenum)
+  -cn|--changenum)
 
-#    shift
-#    change_ctid_number "$@" ;;
+    shift
+    change_ctid_number "$@" ;;
 
   -m|--migrate)
 
