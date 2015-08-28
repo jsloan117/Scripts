@@ -199,7 +199,7 @@ local prog="$(echo $(basename $0))"
 cat <<EOF
 This script is used to manage openvz containers. You can list, create, delete, and set parameters of the virtual machine.
   $prog <[-l|--list] [-lt|--listtemplates] [-lc|--listconfs] [-cc|--create] [-d|--delete] [-s|--set] [-c|--control] [-dc|--lock]
-         [-sc|--suspend] [-cn|--changenum] [-m|--migrate] [-cs|--snapshot] [-ds|--deletesnapshot] [-ls|--listsnapshot] [-h|--help]> <arguments>
+         [-sc|--suspend] [-cn|--changenum] [-m|--migrate] [-cs|--createsnapshot] [-ds|--deletesnapshot] [-ls|--listsnapshot] [-h|--help]> <arguments>
 
   Examples: $prog -l 102
             $prog -cc 102 centos-6-x86_64
