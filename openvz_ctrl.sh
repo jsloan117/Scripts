@@ -179,6 +179,13 @@ local _date="$(date "+%F")"
 vzctl snapshot "$ctid" --name "$ctid-$_date.snapshot"
 }
 
+delete_snapshot () {
+local ctid="$1"
+local uuid="$2"
+
+vzctl snapshot-delete "$ctid" --id "$uuid"
+}
+
 list_snapshots () {
 local ctid="$1"
 
@@ -192,10 +199,10 @@ local prog="$(echo $(basename $0))"
 cat <<EOF
 This script is used to manage openvz containers. You can list, create, delete, and set parameters of the virtual machine.
   $prog <[-l|--list] [-lt|--listtemplates] [-lc|--listconfs] [-cc|--create] [-d|--delete] [-s|--set] [-c|--control] [-dc|--lock]
-         [-sc|--suspend] [-cn|--changenum] [-m|--migrate] [-cs|--snapshot] [-ls|--listsnapshot] [-h|--help]> <arguments>
+         [-sc|--suspend] [-cn|--changenum] [-m|--migrate] [-cs|--snapshot] [-ds|--deletesnapshot] [-ls|--listsnapshot] [-h|--help]> <arguments>
 
   Examples: $prog -l 102
-            $prog -c 102 centos-6-x86_64
+            $prog -cc 102 centos-6-x86_64
             $prog -s hostname hostname.domain.com
             $prog --set ipadd 192.168.2.102
             $prog -s nameserver "8.8.8.8"
@@ -268,10 +275,15 @@ case "$selection" in
     shift
     migrate_container "$@" ;;
 
-  -cs|--snapshot)
+  -cs|--createsnapshot)
 
     shift
-    create_snapshot "$1" ;;
+    create_snapshot "$@" ;;
+
+  -ds|--deletesnapshot)
+
+    shift
+    delete_snapshot "$@" ;;
 
   -ls|--listsnapshot)
 
