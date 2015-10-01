@@ -50,11 +50,9 @@ printf "%s\n\n" "$FINISHED"
 }
 
 add_new_torrent () { # Add new torrents from the command line
-local torrents="$@"
+for torrent in "$@"; do
 
-for torrent in "$torrents"; do
-
-  $TR --trash-torrent -a $torrent
+  $TR --trash-torrent -a "$torrent"; echo -e "\n"
 
 done
 }
