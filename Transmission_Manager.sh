@@ -68,7 +68,7 @@ for ID in $LIST; do
 done
 
 echo ""
-read -ep "Please enter torrent ID number " TOR_ID
+read -ep "Please enter torrent ID number: " TOR_ID
 [[ -z "$TOR_ID" ]] && echo -e "\nYou must supply a torrent ID\n" && exit
 $TR -t $TOR_ID -v
 }
@@ -84,7 +84,7 @@ for ID in $LIST; do
 done
 
 echo ""
-read -ep "Please enter torrent ID number " TOR_ID
+read -ep "Please enter torrent ID number: " TOR_ID
 [[ -z "$TOR_ID" ]] && echo -e "\nYou must supply a torrent ID\n" && exit
 $TR -t $TOR_ID -i
 }
