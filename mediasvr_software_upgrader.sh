@@ -1,58 +1,73 @@
 #!/bin/bash
-# Used to upgrade SickRage/Couchpotato from git repo
-# Please fill in the below varibles correctly. 
-# NOTE: YOU MAY NEED TO ADJUST THE PERMISSIONS ON THE FIND COMMAND BELOW!!
+# used to upgrade SickRage/CouchPotato
+# Added the new check_directory_exist function to automatically detect the next backup dir number in line
 
-SB_BASE='/opt'
-SB_USER='sickbeard'
-CP_BASE='/opt'
-CP_USER='couchpotato'
+sb_base='/opt'
+sb_user='sickbeard'
+cp_base='/opt'
+cp_user='couchpotato'
+
+check_directory_exist () {
+x=1
+dir=/data/"$prog"_old
+
+while [[ -d $dir ]]; do
+
+    x=$(( $x + 1 ))
+    dir=$dir$x
+    [[ -d $dir ]] && dir=$(echo $dir | sed 's|[0-9]||g')
+
+done
+export dir
+}
 
 upgrade_sickbeard () {
-cd $SB_BASE
+local bdir=$dir
+cd $sb_base
 service sickbeard stop
-mv sickbeard sickbeard_old
-git clone https://github.com/SiCKRAGETV/SickRage.git
-mv SickRage sickbeard
-cp -p sickbeard_old/cache.db sickbeard/
-cp -p sickbeard_old/failed.db sickbeard/
-cp -p sickbeard_old/sickbeard.db sickbeard/
-cp -p sickbeard_old/config.ini sickbeard/
-cp -Rp sickbeard_old/cache sickbeard/
+mv sickbeard $bdir
+git clone https://github.com/sickragetv/sickrage.git
+mv sickrage sickbeard
+cp -p $bdir/cache.db sickbeard/
+cp -p $bdir/failed.db sickbeard/
+cp -p $bdir/sickbeard.db sickbeard/
+cp -p $bdir/config.ini sickbeard/
+cp -Rp $bdir/cache sickbeard/
 find ./sickbeard -type f -exec chmod 640 {} \;
 find ./sickbeard -type d -exec chmod 750 {} \;
 chmod 750 sickbeard/SickBeard.py
-chown -R $SB_USER.$SB_USER sickbeard/
+chown -R $sb_user.$sb_user sickbeard/
 service sickbeard start
 }
 
 upgrade_couchpotato () {
-cd $CP_BASE
+local bdir=$dir
+cd $cp_base
 service couchpotato stop
-mv couchpotato couchpotato_old
-git clone https://github.com/RuudBurger/CouchPotatoServer.git
-mv CouchPotatoServer couchpotato
-cp -p couchpotato_old/settings.conf couchpotato/
+mv couchpotato $bdir
+git clone https://github.com/ruudburger/couchpotatoserver.git
+mv couchpotatoserver couchpotato
+cp -p $bdir/settings.conf couchpotato/
 find ./couchpotato -type f -exec chmod 640 {} \;
 find ./couchpotato -type d -exec chmod 750 {} \;
 chmod 750 couchpotato/CouchPotato.py
-chown -R $CP_USER.$CP_USER couchpotato/
+chown -R $cp_user.$cp_user couchpotato/
 service couchpotato start
 }
 
-case "$1" in
+prog="$1"
+case "$prog" in
 
     sickbeard)
 
-        upgrade_sickbeard ;;
+        check_directory_exist && upgrade_sickbeard ;;
 
     couchpotato)
 
-        upgrade_couchpotato ;;
+        check_directory_exist && upgrade_couchpotato ;;
 
     *)
 
-        echo -e "\nPlease supply either sickbeard or couchpotato to upgrade!\n" && exit 1 ;;
+        echo -e "\nplease supply either sickbeard or couchpotato to upgrade!\n" && exit 1 ;;
 
 esac
-exit 0
