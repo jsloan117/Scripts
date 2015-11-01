@@ -59,7 +59,7 @@ for torrent in "$@"; do
 done
 }
 
-verify_torrents () { # Verify torrents
+list_torrents () {
 local LIST=$($TR -l | tail -n+2 | grep -v "^Sum\:" | awk '{ print $1 }')
 [[ -z $LIST ]] && echo -e "\nThere are currently no torrents listed in Transmission\n" && exit
 
@@ -69,45 +69,30 @@ for ID in $LIST; do
   echo -e "$ID: ${NAME#*Name: }"
 
 done
+}
 
-echo ""
+verify_torrents () { # Verify torrents
 read -ep "Please enter torrent ID number: " TOR_ID
 [[ -z "$TOR_ID" ]] && echo -e "\nYou must supply a torrent ID\n" && exit
 $TR -t $TOR_ID -v
 }
 
 torrent_information () { # Check torrent information
-local LIST=$($TR -l | tail -n+2 | grep -v "^Sum\:" | awk '{ print $1 }')
-[[ -z $LIST ]] && echo -e "\nThere are currently no torrents listed in Transmission\n" && exit
-
-for ID in $LIST; do
-
-  local NAME="$($TR -t $ID -i | grep Name:)"
-  echo -e "$ID: ${NAME#*Name: }"
-
-done
-
-echo ""
 read -ep "Please enter torrent ID number: " TOR_ID
 [[ -z "$TOR_ID" ]] && echo -e "\nYou must supply a torrent ID\n" && exit
 $TR -t $TOR_ID -i
 }
 
 list_torrent_files () { # torrents file list
-local LIST=$($TR -l | tail -n+2 | grep -v "^Sum\:" | awk '{ print $1 }')
-[[ -z $LIST ]] && echo -e "\nThere are currently no torrents listed in Transmission\n" && exit
-
-for ID in $LIST; do
-
-  local NAME="$($TR -t $ID -i | grep Name:)"
-  echo -e "$ID: ${NAME#*Name: }"
-
-done
-
-echo ""
 read -ep "Please enter torrent ID number: " TOR_ID
 [[ -z "$TOR_ID" ]] && echo -e "\nYou must supply a torrent ID\n" && exit
 $TR -t $TOR_ID -f
+}
+
+ask_for_more_peers () {
+read -ep "Please enter torrent ID number: " TOR_ID
+[[ -z "$TOR_ID" ]] && echo -e "\nYou must supply a torrent ID\n" && exit
+$TR -t $TOR_ID --reannounce
 }
 
 session_info () {
@@ -125,7 +110,7 @@ prog="$(echo $(basename $0))"
 cat <<EOF
 This script is used to manage transmission daemon. You can add/remove/verify torrents, check out session related info, list torrents.
 
-  $prog <[-r|--remove] [-a|--active] [-f|--finished] [-n|--new] [-v|--verify] [-i|--info] [-l|--files] -si [-ss|--stats]>
+  $prog <[-r|--remove] [-a|--active] [-f|--finished] [-n|--new] [-l|--list] [-v|--verify] [-i|--info] [-lf|--files] [-mp|--morepeers] -si [-ss|--stats]>
   version: $version
 
 EOF
@@ -151,6 +136,10 @@ case $var in
     shift
     add_new_torrent "$@" ;;
 
+  -l|--list)
+
+    list_torrents ;;
+
   -v|--verify)
 
     verify_torrents ;;
@@ -159,9 +148,13 @@ case $var in
 
     torrent_information ;;
 
-  -l|--files)
+  -lf|--files)
 
     list_torrent_files ;;
+
+  -mp|--morepeers)
+
+    ask_for_more_peers ;;
 
   -si)
 
