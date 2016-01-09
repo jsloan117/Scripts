@@ -40,7 +40,7 @@ cd /usr/local/src
 wget https://transmission.cachefly.net/transmission-2.84.tar.xz -O transmission-2.84.tar.xz
 tar -xaf transmission-2.84.tar.xz
 cd transmission-2.84
-./configure --prefix=/usr --enable-daemon --enable-cli
+./configure --prefix=/usr --enable-utp --enable-daemon --enable-cli
 make
 make install
 
