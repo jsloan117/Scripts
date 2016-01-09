@@ -22,7 +22,7 @@ useradd -d /var/lib/$uname -p $encrypt_pass $uname
 
 # Install libevent
 cd /usr/local/src
-wget https://sourceforge.net/projects/levent/files/libevent/libevent-2.0/libevent-2.0.22-stable.tar.gz -O libevent-2.0.22-stable.tar.gz
+wget http://sourceforge.net/projects/levent/files/release-2.0.22-stable/libevent-2.0.22-stable.tar.gz/download -O libevent-2.0.22-stable.tar.gz
 tar -xaf libevent-2.0.22-stable.tar.gz
 cd libevent-2.0.22-stable
 ./configure --prefix=/usr
@@ -30,8 +30,8 @@ make
 make install
 
 # Where are those libevent libraries?
-echo /usr/lib > /etc/ld.so.conf.d/libevent-i386.conf
-echo /usr/lib > /etc/ld.so.conf.d/libevent-x86_64.conf
+echo /usr/lib >> /etc/ld.so.conf.d/libevent-i386.conf
+echo /usr/lib >> /etc/ld.so.conf.d/libevent-x86_64.conf
 ldconfig
 export PKG_CONFIG_PATH=/usr/lib/pkgconfig
 
