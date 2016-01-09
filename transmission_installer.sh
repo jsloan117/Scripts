@@ -45,7 +45,7 @@ make
 make install
 
 # Set up init script for transmission-daemon
-git clone https://github.com/jsloan117/Scripts.git
+git clone --progress https://github.com/jsloan117/Scripts.git
 mv Scripts/transmission-daemon /etc/init.d
 chmod 755 /etc/init.d/transmission-daemon
 chkconfig --add transmission-daemon	
