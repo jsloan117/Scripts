@@ -34,7 +34,7 @@ mhost=${SN_HOST-localhost}
 ##
 
 pidpath=`dirname ${pidfile}`
-options=" -f ${homedir}/config.ini -s ${mhost}:${port} -b 1 --https ${sport} --daemon --pidfile=${pidfile}"
+options="-f ${homedir}/config.ini -s ${mhost}:${port} -b 1 --https ${sport} --daemon --pidfile=${pidfile}"
 
 # create PID directory if not exist and ensure the SickBeard user can write to it
 if [ ! -d $pidpath ]; then
