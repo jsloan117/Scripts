@@ -28,7 +28,7 @@ service sickbeard stop
 mv sickbeard $bdir
 #git clone https://github.com/sickragetv/sickrage.git # Old SR
 git clone https://github.com/SickRage/SickRage.git # New SR
-mv sickrage sickbeard
+mv SickRage sickbeard
 cp -p $bdir/cache.db sickbeard/
 cp -p $bdir/failed.db sickbeard/
 cp -p $bdir/sickbeard.db sickbeard/
