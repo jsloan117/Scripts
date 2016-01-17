@@ -2,15 +2,15 @@
 # used to upgrade SickRage/CouchPotato/SABnzbd
 # Version: 1.2
 
-sb_path='/data/sickbeard'
+sb_path='/opt/sickbeard'
 sb_base=$(dirname $sb_path)
-sb_user='transmission'
-cp_path='/data/couchpotato'
+sb_user='sickbeard'
+cp_path='/opt/couchpotato'
 cp_base=$(dirname $cp_path)
-cp_user='transmission'
-sn_path='/data/sabnzbd'
+cp_user='couchpotato'
+sn_path='/opt/sabnzbd'
 sn_base=$(dirname $sn_path)
-sn_user='transmission'
+sn_user='sabnzbd'
 
 check_directory_exist () {
 x=1
@@ -85,7 +85,7 @@ wget -q --spider http://sourceforge.net/projects/sabnzbdplus/files/sabnzbdplus/$
 local sabnzbd_url="$1"
 local sabnzbdurl="${sabnzbd_url%/*}"
 local sabnzbd_file="${sabnzbdurl##*/}"
-local sabnzbd_changelog_file='/data/sabnzbd/CHANGELOG.txt'
+local sabnzbd_changelog_file="$sn_path/CHANGELOG.txt"
 local sn_version=$(head -n2 $sabnzbd_changelog_file | tail -n1 | awk '{ print $1 }' | awk -F'.' '{ print $3 }')
 local next_version=$(( $sn_version + 1 ))
 local sn_new_version="0.7.$next_version"
