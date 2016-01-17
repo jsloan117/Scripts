@@ -1,5 +1,6 @@
 #!/bin/bash
 # used to upgrade SickRage/CouchPotato/SABnzbd
+# Version: 1.2
 
 sb_path='/data/sickbeard'
 sb_base=$(dirname $sb_path)
