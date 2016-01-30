@@ -43,6 +43,7 @@ cd transmission-2.84
 ./configure --prefix=/usr --enable-utp --enable-daemon --enable-cli
 make
 make install
+rm -f transmission-2.84.tar.xz
 
 # Set up init script for transmission-daemon
 git clone --progress https://github.com/jsloan117/Scripts.git
