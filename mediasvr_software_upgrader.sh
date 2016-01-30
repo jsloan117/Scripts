@@ -1,6 +1,6 @@
 #!/bin/bash
 # used to upgrade SickRage/CouchPotato/SABnzbd
-# Version: 1.2
+# Version: 1.3
 
 sb_path='/opt/sickbeard'
 sb_base=$(dirname $sb_path)
@@ -11,21 +11,22 @@ cp_user='couchpotato'
 sn_path='/opt/sabnzbd'
 sn_base=$(dirname $sn_path)
 sn_user='sabnzbd'
+backup_prefix='_old'
 
 check_directory_exist () {
 x=1
 
 if [[ $prog = sickbeard ]]; then
 
-  dir="$sb_path"_old
+  dir=$sb_path$backup_prefix
 
 elif [[ $prog = couchpotato ]]; then
 
-  dir="$cp_path"_old
+  dir=$cp_path$backup_prefix
 
 elif [[ $prog = sabnzbd ]]; then
 
-  dir="$sn_path"_old
+  dir=$sn_path$backup_prefix
 
 fi
 
@@ -47,13 +48,13 @@ mv sickbeard $bdir
 #git clone https://github.com/sickragetv/sickrage.git # Old SR
 git clone https://github.com/SickRage/SickRage.git # New SR
 mv SickRage sickbeard
-cp -p $bdir/cache.db sickbeard/
+#cp -p $bdir/cache.db sickbeard/
 cp -p $bdir/failed.db sickbeard/
 cp -p $bdir/sickbeard.db sickbeard/
 cp -p $bdir/config.ini sickbeard/
 cp -Rp $bdir/cache sickbeard/
-find ./sickbeard -type f -exec chmod 640 {} \;
-find ./sickbeard -type d -exec chmod 750 {} \;
+find $sb_path -type f -exec chmod 640 {} \;
+find $sb_path -type d -exec chmod 750 {} \;
 chmod 750 sickbeard/SickBeard.py
 chown -R $sb_user.$sb_user sickbeard/
 service sickbeard start
@@ -67,8 +68,8 @@ mv couchpotato $bdir
 git clone https://github.com/ruudburger/couchpotatoserver.git
 mv couchpotatoserver couchpotato
 cp -p $bdir/settings.conf couchpotato/
-find ./couchpotato -type f -exec chmod 640 {} \;
-find ./couchpotato -type d -exec chmod 750 {} \;
+find $cp_path -type f -exec chmod 640 {} \;
+find $cp_path -type d -exec chmod 750 {} \;
 chmod 750 couchpotato/CouchPotato.py
 chown -R $cp_user.$cp_user couchpotato/
 service couchpotato start
@@ -120,8 +121,8 @@ fi
 
 mv SABnzbd* sabnzbd
 cp -p $bdir/config.ini sabnzbd/
-find ./sabnzbd -type f -exec chmod 640 {} \;
-find ./sabnzbd -type d -exec chmod 750 {} \;
+find $sn_path -type f -exec chmod 640 {} \;
+find $sn_path -type d -exec chmod 750 {} \;
 chmod 750 sabnzbd/SABnzbd.py
 chown -R $sn_user.$sn_user sabnzbd/
 service sabnzbd start
